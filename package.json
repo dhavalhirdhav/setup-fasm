@@ -1,0 +1,34 @@
+{
+  "name": "setup-fasm",
+  "version": "1.0.0",
+  "description": "GitHub Action to download and install FASM (Flat Assembler)",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint index.js",
+    "test": "eslint index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhavalhirdhav/setup-fasm.git"
+  },
+  "keywords": [
+    "GitHub",
+    "Actions",
+    "FASM",
+    "Flat Assembler"
+  ],
+  "author": "dhavalhirdhav <dhaval_faria@hotmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dhavalhirdhav/setup-fasm/issues"
+  },
+  "homepage": "https://github.com/dhavalhirdhav/setup-fasm#readme",
+  "dependencies": {
+    "@actions/core": "^1.1.1",
+    "adm-zip": "^0.4.13",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.5.0"
+  }
+}
