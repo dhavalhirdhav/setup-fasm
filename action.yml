@@ -1,0 +1,14 @@
+name: Set up FASM (Flat Assembler)
+description: Download and install FASM (Flat Assembler)
+inputs:
+  platform:
+    description: |
+      Override platform selection
+      One of: `dos`, `linux`, `win64`
+      See https://flatassembler.net/download.php for available platforms.
+runs:
+  using: node12
+  main: index.js
+branding:
+  icon: archive
+  color: blue
