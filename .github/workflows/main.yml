@@ -24,6 +24,6 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: FASM
-      uses: dhavalhirdhav/setup-fasm@v1
+      uses: https://github.com/dhavalhirdhav/setup-fasm.git
       with:
         platform: "linux"
