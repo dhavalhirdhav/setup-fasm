@@ -19,12 +19,7 @@ function selectPlatform(platform) {
 }
 
 async function main() {
-    const version = core.getInput('version', {required: true})
-    const destination = core.getInput('destination') || 'fasm'
-    const from_source = core.getInput('from-source')
     // Yeah, these are strings... JavaScript at its finest
-    const try_binary = (from_source != 'true')
-    const try_source = (from_source != 'false')
     const platform = selectPlatform(core.getInput('platform'))
 
     const homedir = require('os').homedir()
