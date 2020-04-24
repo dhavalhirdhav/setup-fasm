@@ -59,15 +59,13 @@ async function main() {
     }
 
     var made_it = false
-    if (try_binary && !made_it) {
-        try {
-            core.info('Downloading binary distribution...')
-            await downloadBinary()
-            made_it = true
-        }
-        catch (error) {
-            core.warning(`binaries did not work: ${error}`)
-        }
+    try {
+        core.info('Downloading binary distribution...')
+        await downloadBinary()
+        made_it = true
+    }
+    catch (error) {
+        core.warning(`binaries did not work: ${error}`)
     }
 
     execute([absFasmFile, '-version'])
