@@ -27,7 +27,7 @@ async function main() {
 
     const homedir = require('os').homedir()
     const absFasmDir = path.resolve(homedir, destination)
-    const fasm = (process.platform == 'win32' ? 'fasm.exe' : 'fasm/fasm')
+    const fasm = (process.platform == 'win32' ? 'fasm.exe' : 'fasm')
     const absFasmFile = path.join(absFasmDir, fasm)
 
     if (!fs.existsSync(absFasmDir)) {
@@ -57,7 +57,7 @@ async function main() {
 		const request = https.get(fasm_download_url, function(response){
 			response.pipe(file);
 		        targz.decompress({
-                            src: `fasm-1.73.23.tgz`,
+                            src: `fasm.tgz`,
                             dest: absFasmDir
                         }, function(err){
                             if(err) {
