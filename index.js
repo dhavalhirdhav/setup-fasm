@@ -7,7 +7,7 @@ const fetch = require('node-fetch')
 const path = require('path')
 const process = require('process')
 const URL = require('url').URL
-const http = require('http')
+const https = require('https')
 
 // This could have been a ten-line shell script, but no, we are full-stack async now...
 // Though, it does look pretty in the Web console.
@@ -54,7 +54,7 @@ async function main() {
 	if(process.platform == 'linux')
 	{
 		const file = fs.createWriteStream("fasm.tgz")
-		const request = http.get(fasm_download_url, function(response){
+		const request = https.get(fasm_download_url, function(response){
 			response.pipe(file);
 		        targz.decompress({
                             src: `fasm-1.73.23.tgz`,
