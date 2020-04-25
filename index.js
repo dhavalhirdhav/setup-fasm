@@ -1,11 +1,13 @@
 const core = require('@actions/core')
 const AdmZip = require('adm-zip')
+const targz = require('targz');
 const spawn = require('child_process').spawnSync
 const fs = require('fs')
 const fetch = require('node-fetch')
 const path = require('path')
 const process = require('process')
 const URL = require('url').URL
+const http = require('https')
 
 // This could have been a ten-line shell script, but no, we are full-stack async now...
 // Though, it does look pretty in the Web console.
@@ -19,13 +21,9 @@ function selectPlatform(platform) {
 }
 
 async function main() {
-    const version = core.getInput('version', {required: true})
-    const destination = core.getInput('destination') || 'fasm'
-    const from_source = core.getInput('from-source')
     // Yeah, these are strings... JavaScript at its finest
-    const try_binary = (from_source != 'true')
-    const try_source = (from_source != 'false')
     const platform = selectPlatform(core.getInput('platform'))
+    const destination = "fasm"
 
     const homedir = require('os').homedir()
     const absFasmDir = path.resolve(homedir, destination)
@@ -45,15 +43,32 @@ async function main() {
         else
         {
           fasm_download_url = 'https://flatassembler.net/fasmw17323.zip';
+		//fasm_download_url = 'http://localhost/fasmw17323.zip';
         }
         const url = new URL(fasm_download_url)
-        const buffer = await fetchBuffer(url)
-        const zip = new AdmZip(buffer)
+	const buffer = await fetchBuffer(url)
+        const fasmEntry = `fasm/${fasm}`
 
         // Pull out the one binary we're interested in from the downloaded archive,
         // overwrite anything that's there, and make sure the file is executable.
-        const fasmEntry = `fasm-${version}/${fasm}`
-        zip.extractEntryTo(fasmEntry, absFasmDir, false, true)
+	if(process.platform == 'linux')
+	{
+	        targz.decompress({
+                            src: buffer,
+                            dest: absFasmDir
+                        }, function(err){
+                            if(err) {
+                                console.log(err);
+                            } else {
+                                console.log("Done!");
+                            }
+                        });
+	}
+	else
+	{
+		const zip = new AdmZip(buffer)
+	        zip.extractAllTo(absFasmDir, false, true)
+	}
         if (!fs.existsSync(absFasmFile)) {
             core.debug(`fasm executable missing: ${absFasmFile}`)
             throw new Error(`failed to extract to '${absFasmDir}'`)
@@ -64,15 +79,13 @@ async function main() {
     }
 
     var made_it = false
-    if (try_binary && !made_it) {
-        try {
-            core.info('Downloading binary distribution...')
-            await downloadBinary()
-            made_it = true
-        }
-        catch (error) {
-            core.warning(`binaries did not work: ${error}`)
-        }
+    try {
+        core.info('Downloading binary distribution...')
+        await downloadBinary()
+        made_it = true
+    }
+    catch (error) {
+        core.warning(`binaries did not work: ${error}`)
     }
 
     execute([absFasmFile, '-version'])
@@ -89,7 +102,7 @@ function execute(cmdline, extra_options) {
         core.debug(`failed to spawn process: ${result.error}`)
         throw result.error
     }
-    if (result.status !== 0) {
+    if (result.status !== 1) {
         const command = path.basename(cmdline[0])
         const error = new Error(`${command} failed: exit code ${result.status}`)
         core.debug(`${error}`)
