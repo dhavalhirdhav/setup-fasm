@@ -21,6 +21,7 @@ function selectPlatform(platform) {
 async function main() {
     // Yeah, these are strings... JavaScript at its finest
     const platform = selectPlatform(core.getInput('platform'))
+    const destination = "fasm"
 
     const homedir = require('os').homedir()
     const absFasmDir = path.resolve(homedir, destination)
