@@ -1,4 +1,5 @@
 const core = require('@actions/core')
+const AdmZip = require('adm-zip')
 const targz = require('targz');
 const spawn = require('child_process').spawnSync
 const fs = require('fs')
@@ -6,7 +7,7 @@ const fetch = require('node-fetch')
 const path = require('path')
 const process = require('process')
 const URL = require('url').URL
-const http = require('http')
+const http = require('https')
 
 // This could have been a ten-line shell script, but no, we are full-stack async now...
 // Though, it does look pretty in the Web console.
@@ -42,21 +43,18 @@ async function main() {
         else
         {
           fasm_download_url = 'https://flatassembler.net/fasmw17323.zip';
+		//fasm_download_url = 'http://localhost/fasmw17323.zip';
         }
         const url = new URL(fasm_download_url)
-        const file = fs.createWriteStream("fasm.tgz");
-        http.get(fasm_download_url, function(response) {
-            response.pipe(file);
-            file.on('finish', function() {
-                file.close(cb);  // close() is async, call cb after close completes.
-               });
-        });
+	const buffer = await fetchBuffer(url)
+        const fasmEntry = `fasm/${fasm}`
 
         // Pull out the one binary we're interested in from the downloaded archive,
         // overwrite anything that's there, and make sure the file is executable.
-        const fasmEntry = `fasm/${fasm}`
-        targz.decompress({
-                            src: file,
+	if(process.platform == 'linux')
+	{
+	        targz.decompress({
+                            src: buffer,
                             dest: absFasmDir
                         }, function(err){
                             if(err) {
@@ -65,7 +63,12 @@ async function main() {
                                 console.log("Done!");
                             }
                         });
-        //zip.extractEntryTo(fasmEntry, absFasmDir, false, true)
+	}
+	else
+	{
+		const zip = new AdmZip(buffer)
+	        zip.extractAllTo(absFasmDir, false, true)
+	}
         if (!fs.existsSync(absFasmFile)) {
             core.debug(`fasm executable missing: ${absFasmFile}`)
             throw new Error(`failed to extract to '${absFasmDir}'`)
@@ -99,7 +102,7 @@ function execute(cmdline, extra_options) {
         core.debug(`failed to spawn process: ${result.error}`)
         throw result.error
     }
-    if (result.status !== 0) {
+    if (result.status !== 1) {
         const command = path.basename(cmdline[0])
         const error = new Error(`${command} failed: exit code ${result.status}`)
         core.debug(`${error}`)
