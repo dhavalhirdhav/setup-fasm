@@ -7,7 +7,7 @@ const fetch = require('node-fetch')
 const path = require('path')
 const process = require('process')
 const URL = require('url').URL
-const http = require('https')
+const http = require('http')
 
 // This could have been a ten-line shell script, but no, we are full-stack async now...
 // Though, it does look pretty in the Web console.
@@ -27,7 +27,7 @@ async function main() {
 
     const homedir = require('os').homedir()
     const absFasmDir = path.resolve(homedir, destination)
-    const fasm = (process.platform == 'win32' ? 'fasm.exe' : 'fasm')
+    const fasm = (process.platform == 'win32' ? 'fasm.exe' : 'fasm\fasm')
     const absFasmFile = path.join(absFasmDir, fasm)
 
     if (!fs.existsSync(absFasmDir)) {
@@ -39,6 +39,7 @@ async function main() {
         if (process.platform == 'linux')
         {
           fasm_download_url = 'https://flatassembler.net/fasm-1.73.23.tgz';
+		//fasm_download_url = 'http://localhost/fasm-1.73.23.tgz';
         }
         else
         {
@@ -47,14 +48,16 @@ async function main() {
         }
         const url = new URL(fasm_download_url)
 	const buffer = await fetchBuffer(url)
-        const fasmEntry = `fasm/${fasm}`
 
         // Pull out the one binary we're interested in from the downloaded archive,
         // overwrite anything that's there, and make sure the file is executable.
 	if(process.platform == 'linux')
 	{
-	        targz.decompress({
-                            src: buffer,
+		const file = fs.createWriteStream("fasm.tgz")
+		const request = http.get(fasm_download_url, function(response){
+			response.pipe(file);
+		        targz.decompress({
+                            src: `fasm-1.73.23.tgz`,
                             dest: absFasmDir
                         }, function(err){
                             if(err) {
@@ -63,12 +66,14 @@ async function main() {
                                 console.log("Done!");
                             }
                         });
+		});
 	}
 	else
 	{
 		const zip = new AdmZip(buffer)
 	        zip.extractAllTo(absFasmDir, false, true)
 	}
+
         if (!fs.existsSync(absFasmFile)) {
             core.debug(`fasm executable missing: ${absFasmFile}`)
             throw new Error(`failed to extract to '${absFasmDir}'`)
